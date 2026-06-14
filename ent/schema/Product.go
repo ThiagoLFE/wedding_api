@@ -16,7 +16,7 @@ func (Product) Fields() []ent.Field {
 		field.String("title"),
 		field.String("reserved_by").Nillable(),
 		field.Text("image").Optional(),
-		field.Float("valor"),
+		field.Float("value"),
 	}
 }
 

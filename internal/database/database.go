@@ -1,4 +1,4 @@
-package wedding_api
+package database
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func main() {
+func GetDBX() *ent.Client {
 
 	client, err := ent.Open(
 		"postgres",
@@ -17,14 +17,15 @@ func main() {
 	)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to connect to database", err)
 	}
 
 	defer client.Close()
 
 	// Cria tabelas se não existirem
 	if err := client.Schema.Create(context.Background()); err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to connect to database", err)
 	}
 
+	return client
 }

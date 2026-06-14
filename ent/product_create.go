@@ -45,9 +45,9 @@ func (_c *ProductCreate) SetNillableImage(v *string) *ProductCreate {
 	return _c
 }
 
-// SetValor sets the "valor" field.
-func (_c *ProductCreate) SetValor(v float64) *ProductCreate {
-	_c.mutation.SetValor(v)
+// SetValue sets the "value" field.
+func (_c *ProductCreate) SetValue(v float64) *ProductCreate {
+	_c.mutation.SetValue(v)
 	return _c
 }
 
@@ -91,8 +91,8 @@ func (_c *ProductCreate) check() error {
 	if _, ok := _c.mutation.ReservedBy(); !ok {
 		return &ValidationError{Name: "reserved_by", err: errors.New(`ent: missing required field "Product.reserved_by"`)}
 	}
-	if _, ok := _c.mutation.Valor(); !ok {
-		return &ValidationError{Name: "valor", err: errors.New(`ent: missing required field "Product.valor"`)}
+	if _, ok := _c.mutation.Value(); !ok {
+		return &ValidationError{Name: "value", err: errors.New(`ent: missing required field "Product.value"`)}
 	}
 	return nil
 }
@@ -132,9 +132,9 @@ func (_c *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 		_spec.SetField(product.FieldImage, field.TypeString, value)
 		_node.Image = value
 	}
-	if value, ok := _c.mutation.Valor(); ok {
-		_spec.SetField(product.FieldValor, field.TypeFloat64, value)
-		_node.Valor = value
+	if value, ok := _c.mutation.Value(); ok {
+		_spec.SetField(product.FieldValue, field.TypeFloat64, value)
+		_node.Value = value
 	}
 	return _node, _spec
 }

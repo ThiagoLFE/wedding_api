@@ -17,8 +17,8 @@ const (
 	FieldReservedBy = "reserved_by"
 	// FieldImage holds the string denoting the image field in the database.
 	FieldImage = "image"
-	// FieldValor holds the string denoting the valor field in the database.
-	FieldValor = "valor"
+	// FieldValue holds the string denoting the value field in the database.
+	FieldValue = "value"
 	// Table holds the table name of the product in the database.
 	Table = "products"
 )
@@ -29,7 +29,7 @@ var Columns = []string{
 	FieldTitle,
 	FieldReservedBy,
 	FieldImage,
-	FieldValor,
+	FieldValue,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -65,7 +65,7 @@ func ByImage(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldImage, opts...).ToFunc()
 }
 
-// ByValor orders the results by the valor field.
-func ByValor(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldValor, opts...).ToFunc()
+// ByValue orders the results by the value field.
+func ByValue(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldValue, opts...).ToFunc()
 }

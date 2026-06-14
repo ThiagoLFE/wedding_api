@@ -14,7 +14,7 @@ var (
 		{Name: "title", Type: field.TypeString},
 		{Name: "reserved_by", Type: field.TypeString},
 		{Name: "image", Type: field.TypeString, Nullable: true, Size: 2147483647},
-		{Name: "valor", Type: field.TypeFloat64},
+		{Name: "value", Type: field.TypeFloat64},
 	}
 	// ProductsTable holds the schema information for the "products" table.
 	ProductsTable = &schema.Table{

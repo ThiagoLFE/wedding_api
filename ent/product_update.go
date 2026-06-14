@@ -75,24 +75,24 @@ func (_u *ProductUpdate) ClearImage() *ProductUpdate {
 	return _u
 }
 
-// SetValor sets the "valor" field.
-func (_u *ProductUpdate) SetValor(v float64) *ProductUpdate {
-	_u.mutation.ResetValor()
-	_u.mutation.SetValor(v)
+// SetValue sets the "value" field.
+func (_u *ProductUpdate) SetValue(v float64) *ProductUpdate {
+	_u.mutation.ResetValue()
+	_u.mutation.SetValue(v)
 	return _u
 }
 
-// SetNillableValor sets the "valor" field if the given value is not nil.
-func (_u *ProductUpdate) SetNillableValor(v *float64) *ProductUpdate {
+// SetNillableValue sets the "value" field if the given value is not nil.
+func (_u *ProductUpdate) SetNillableValue(v *float64) *ProductUpdate {
 	if v != nil {
-		_u.SetValor(*v)
+		_u.SetValue(*v)
 	}
 	return _u
 }
 
-// AddValor adds value to the "valor" field.
-func (_u *ProductUpdate) AddValor(v float64) *ProductUpdate {
-	_u.mutation.AddValor(v)
+// AddValue adds value to the "value" field.
+func (_u *ProductUpdate) AddValue(v float64) *ProductUpdate {
+	_u.mutation.AddValue(v)
 	return _u
 }
 
@@ -149,11 +149,11 @@ func (_u *ProductUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.ImageCleared() {
 		_spec.ClearField(product.FieldImage, field.TypeString)
 	}
-	if value, ok := _u.mutation.Valor(); ok {
-		_spec.SetField(product.FieldValor, field.TypeFloat64, value)
+	if value, ok := _u.mutation.Value(); ok {
+		_spec.SetField(product.FieldValue, field.TypeFloat64, value)
 	}
-	if value, ok := _u.mutation.AddedValor(); ok {
-		_spec.AddField(product.FieldValor, field.TypeFloat64, value)
+	if value, ok := _u.mutation.AddedValue(); ok {
+		_spec.AddField(product.FieldValue, field.TypeFloat64, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -223,24 +223,24 @@ func (_u *ProductUpdateOne) ClearImage() *ProductUpdateOne {
 	return _u
 }
 
-// SetValor sets the "valor" field.
-func (_u *ProductUpdateOne) SetValor(v float64) *ProductUpdateOne {
-	_u.mutation.ResetValor()
-	_u.mutation.SetValor(v)
+// SetValue sets the "value" field.
+func (_u *ProductUpdateOne) SetValue(v float64) *ProductUpdateOne {
+	_u.mutation.ResetValue()
+	_u.mutation.SetValue(v)
 	return _u
 }
 
-// SetNillableValor sets the "valor" field if the given value is not nil.
-func (_u *ProductUpdateOne) SetNillableValor(v *float64) *ProductUpdateOne {
+// SetNillableValue sets the "value" field if the given value is not nil.
+func (_u *ProductUpdateOne) SetNillableValue(v *float64) *ProductUpdateOne {
 	if v != nil {
-		_u.SetValor(*v)
+		_u.SetValue(*v)
 	}
 	return _u
 }
 
-// AddValor adds value to the "valor" field.
-func (_u *ProductUpdateOne) AddValor(v float64) *ProductUpdateOne {
-	_u.mutation.AddValor(v)
+// AddValue adds value to the "value" field.
+func (_u *ProductUpdateOne) AddValue(v float64) *ProductUpdateOne {
+	_u.mutation.AddValue(v)
 	return _u
 }
 
@@ -327,11 +327,11 @@ func (_u *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err er
 	if _u.mutation.ImageCleared() {
 		_spec.ClearField(product.FieldImage, field.TypeString)
 	}
-	if value, ok := _u.mutation.Valor(); ok {
-		_spec.SetField(product.FieldValor, field.TypeFloat64, value)
+	if value, ok := _u.mutation.Value(); ok {
+		_spec.SetField(product.FieldValue, field.TypeFloat64, value)
 	}
-	if value, ok := _u.mutation.AddedValor(); ok {
-		_spec.AddField(product.FieldValor, field.TypeFloat64, value)
+	if value, ok := _u.mutation.AddedValue(); ok {
+		_spec.AddField(product.FieldValue, field.TypeFloat64, value)
 	}
 	_node = &Product{config: _u.config}
 	_spec.Assign = _node.assignValues

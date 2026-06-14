@@ -68,9 +68,9 @@ func Image(v string) predicate.Product {
 	return predicate.Product(sql.FieldEQ(FieldImage, v))
 }
 
-// Valor applies equality check predicate on the "valor" field. It's identical to ValorEQ.
-func Valor(v float64) predicate.Product {
-	return predicate.Product(sql.FieldEQ(FieldValor, v))
+// Value applies equality check predicate on the "value" field. It's identical to ValueEQ.
+func Value(v float64) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldValue, v))
 }
 
 // TitleEQ applies the EQ predicate on the "title" field.
@@ -278,44 +278,44 @@ func ImageContainsFold(v string) predicate.Product {
 	return predicate.Product(sql.FieldContainsFold(FieldImage, v))
 }
 
-// ValorEQ applies the EQ predicate on the "valor" field.
-func ValorEQ(v float64) predicate.Product {
-	return predicate.Product(sql.FieldEQ(FieldValor, v))
+// ValueEQ applies the EQ predicate on the "value" field.
+func ValueEQ(v float64) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldValue, v))
 }
 
-// ValorNEQ applies the NEQ predicate on the "valor" field.
-func ValorNEQ(v float64) predicate.Product {
-	return predicate.Product(sql.FieldNEQ(FieldValor, v))
+// ValueNEQ applies the NEQ predicate on the "value" field.
+func ValueNEQ(v float64) predicate.Product {
+	return predicate.Product(sql.FieldNEQ(FieldValue, v))
 }
 
-// ValorIn applies the In predicate on the "valor" field.
-func ValorIn(vs ...float64) predicate.Product {
-	return predicate.Product(sql.FieldIn(FieldValor, vs...))
+// ValueIn applies the In predicate on the "value" field.
+func ValueIn(vs ...float64) predicate.Product {
+	return predicate.Product(sql.FieldIn(FieldValue, vs...))
 }
 
-// ValorNotIn applies the NotIn predicate on the "valor" field.
-func ValorNotIn(vs ...float64) predicate.Product {
-	return predicate.Product(sql.FieldNotIn(FieldValor, vs...))
+// ValueNotIn applies the NotIn predicate on the "value" field.
+func ValueNotIn(vs ...float64) predicate.Product {
+	return predicate.Product(sql.FieldNotIn(FieldValue, vs...))
 }
 
-// ValorGT applies the GT predicate on the "valor" field.
-func ValorGT(v float64) predicate.Product {
-	return predicate.Product(sql.FieldGT(FieldValor, v))
+// ValueGT applies the GT predicate on the "value" field.
+func ValueGT(v float64) predicate.Product {
+	return predicate.Product(sql.FieldGT(FieldValue, v))
 }
 
-// ValorGTE applies the GTE predicate on the "valor" field.
-func ValorGTE(v float64) predicate.Product {
-	return predicate.Product(sql.FieldGTE(FieldValor, v))
+// ValueGTE applies the GTE predicate on the "value" field.
+func ValueGTE(v float64) predicate.Product {
+	return predicate.Product(sql.FieldGTE(FieldValue, v))
 }
 
-// ValorLT applies the LT predicate on the "valor" field.
-func ValorLT(v float64) predicate.Product {
-	return predicate.Product(sql.FieldLT(FieldValor, v))
+// ValueLT applies the LT predicate on the "value" field.
+func ValueLT(v float64) predicate.Product {
+	return predicate.Product(sql.FieldLT(FieldValue, v))
 }
 
-// ValorLTE applies the LTE predicate on the "valor" field.
-func ValorLTE(v float64) predicate.Product {
-	return predicate.Product(sql.FieldLTE(FieldValor, v))
+// ValueLTE applies the LTE predicate on the "value" field.
+func ValueLTE(v float64) predicate.Product {
+	return predicate.Product(sql.FieldLTE(FieldValue, v))
 }
 
 // And groups predicates with the AND operator between them.

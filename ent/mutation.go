@@ -35,8 +35,8 @@ type ProductMutation struct {
 	title         *string
 	reserved_by   *string
 	image         *string
-	valor         *float64
-	addvalor      *float64
+	value         *float64
+	addvalue      *float64
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Product, error)
@@ -262,60 +262,60 @@ func (m *ProductMutation) ResetImage() {
 	delete(m.clearedFields, product.FieldImage)
 }
 
-// SetValor sets the "valor" field.
-func (m *ProductMutation) SetValor(f float64) {
-	m.valor = &f
-	m.addvalor = nil
+// SetValue sets the "value" field.
+func (m *ProductMutation) SetValue(f float64) {
+	m.value = &f
+	m.addvalue = nil
 }
 
-// Valor returns the value of the "valor" field in the mutation.
-func (m *ProductMutation) Valor() (r float64, exists bool) {
-	v := m.valor
+// Value returns the value of the "value" field in the mutation.
+func (m *ProductMutation) Value() (r float64, exists bool) {
+	v := m.value
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldValor returns the old "valor" field's value of the Product entity.
+// OldValue returns the old "value" field's value of the Product entity.
 // If the Product object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProductMutation) OldValor(ctx context.Context) (v float64, err error) {
+func (m *ProductMutation) OldValue(ctx context.Context) (v float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldValor is only allowed on UpdateOne operations")
+		return v, errors.New("OldValue is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldValor requires an ID field in the mutation")
+		return v, errors.New("OldValue requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldValor: %w", err)
+		return v, fmt.Errorf("querying old value for OldValue: %w", err)
 	}
-	return oldValue.Valor, nil
+	return oldValue.Value, nil
 }
 
-// AddValor adds f to the "valor" field.
-func (m *ProductMutation) AddValor(f float64) {
-	if m.addvalor != nil {
-		*m.addvalor += f
+// AddValue adds f to the "value" field.
+func (m *ProductMutation) AddValue(f float64) {
+	if m.addvalue != nil {
+		*m.addvalue += f
 	} else {
-		m.addvalor = &f
+		m.addvalue = &f
 	}
 }
 
-// AddedValor returns the value that was added to the "valor" field in this mutation.
-func (m *ProductMutation) AddedValor() (r float64, exists bool) {
-	v := m.addvalor
+// AddedValue returns the value that was added to the "value" field in this mutation.
+func (m *ProductMutation) AddedValue() (r float64, exists bool) {
+	v := m.addvalue
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetValor resets all changes to the "valor" field.
-func (m *ProductMutation) ResetValor() {
-	m.valor = nil
-	m.addvalor = nil
+// ResetValue resets all changes to the "value" field.
+func (m *ProductMutation) ResetValue() {
+	m.value = nil
+	m.addvalue = nil
 }
 
 // Where appends a list predicates to the ProductMutation builder.
@@ -362,8 +362,8 @@ func (m *ProductMutation) Fields() []string {
 	if m.image != nil {
 		fields = append(fields, product.FieldImage)
 	}
-	if m.valor != nil {
-		fields = append(fields, product.FieldValor)
+	if m.value != nil {
+		fields = append(fields, product.FieldValue)
 	}
 	return fields
 }
@@ -379,8 +379,8 @@ func (m *ProductMutation) Field(name string) (ent.Value, bool) {
 		return m.ReservedBy()
 	case product.FieldImage:
 		return m.Image()
-	case product.FieldValor:
-		return m.Valor()
+	case product.FieldValue:
+		return m.Value()
 	}
 	return nil, false
 }
@@ -396,8 +396,8 @@ func (m *ProductMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldReservedBy(ctx)
 	case product.FieldImage:
 		return m.OldImage(ctx)
-	case product.FieldValor:
-		return m.OldValor(ctx)
+	case product.FieldValue:
+		return m.OldValue(ctx)
 	}
 	return nil, fmt.Errorf("unknown Product field %s", name)
 }
@@ -428,12 +428,12 @@ func (m *ProductMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetImage(v)
 		return nil
-	case product.FieldValor:
+	case product.FieldValue:
 		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetValor(v)
+		m.SetValue(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Product field %s", name)
@@ -443,8 +443,8 @@ func (m *ProductMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *ProductMutation) AddedFields() []string {
 	var fields []string
-	if m.addvalor != nil {
-		fields = append(fields, product.FieldValor)
+	if m.addvalue != nil {
+		fields = append(fields, product.FieldValue)
 	}
 	return fields
 }
@@ -454,8 +454,8 @@ func (m *ProductMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *ProductMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case product.FieldValor:
-		return m.AddedValor()
+	case product.FieldValue:
+		return m.AddedValue()
 	}
 	return nil, false
 }
@@ -465,12 +465,12 @@ func (m *ProductMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *ProductMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case product.FieldValor:
+	case product.FieldValue:
 		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddValor(v)
+		m.AddValue(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Product numeric field %s", name)
@@ -517,8 +517,8 @@ func (m *ProductMutation) ResetField(name string) error {
 	case product.FieldImage:
 		m.ResetImage()
 		return nil
-	case product.FieldValor:
-		m.ResetValor()
+	case product.FieldValue:
+		m.ResetValue()
 		return nil
 	}
 	return fmt.Errorf("unknown Product field %s", name)
