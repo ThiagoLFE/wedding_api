@@ -1,5 +1,45 @@
-package routes
+package router
 
-import "wedding_api/ent"
+import (
+	"net/http"
+	"wedding_api/internal/handlers"
 
-func GetRoutes(client *ent.Client)
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+)
+
+func NewRouter(handler *handlers.Handler) http.Handler {
+
+	r := chi.NewRouter()
+
+	// Middlewares
+	r.Use(middleware.RequestID)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{
+			"http://localhost:3000",
+		},
+		AllowedMethods: []string{
+			"GET", "POST", "PUT", "DELETE",
+		},
+		AllowedHeaders: []string{
+			"Accept",
+			"Authorization",
+			"Content-Type",
+		},
+	}))
+
+	r.Get("/", func(w http.ResponseWriter, req *http.Request) {
+		w.Write([]byte("Hello World!"))
+	})
+
+	// Rotas
+	r.Route("/products", func(r chi.Router) {
+		r.Post("/", handler.CreateProduct)
+	})
+
+	return r
+}

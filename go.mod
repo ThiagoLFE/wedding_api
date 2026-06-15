@@ -13,6 +13,7 @@ require (
 	github.com/clipperhouse/uax29/v2 v2.3.0 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/go-chi/chi/v5 v5.3.0 // indirect
+	github.com/go-chi/cors v1.2.2 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect

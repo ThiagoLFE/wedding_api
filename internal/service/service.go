@@ -11,7 +11,7 @@ type Service struct {
 	client *ent.Client
 }
 
-func GetService(client *ent.Client) *Service {
+func NewService(client *ent.Client) *Service {
 	return &Service{
 		client: client,
 	}

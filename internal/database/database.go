@@ -9,7 +9,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func GetDBX() *ent.Client {
+func NewDB() *ent.Client {
 
 	client, err := ent.Open(
 		"postgres",
