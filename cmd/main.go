@@ -12,6 +12,8 @@ import (
 
 func main() {
 	client := database.NewDB()
+	defer client.Close()
+
 	service := service.NewService(client)
 	handler := handlers.NewHandler(service)
 	routes := router.NewRouter(handler)

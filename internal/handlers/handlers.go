@@ -90,7 +90,7 @@ func (h *Handler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 	var response service.ProductRequest
 
-	if err := json.NewDecoder(r.Body).Decode(response); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&response); err != nil {
 		http.Error(w, fmt.Errorf("invalid json: %w", err).Error(), http.StatusBadRequest)
 		return
 	}

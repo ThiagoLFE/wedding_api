@@ -35,9 +35,6 @@ func (p *ProductRequest) Validate() error {
 	if len(strings.TrimSpace(p.Title)) == 0 {
 		return errors.New("the Product must have a title")
 	}
-	if p.ReservedBy != "" {
-		return errors.New("you can't create a present already reserved")
-	}
 	if p.Value <= 0.00 {
 		return errors.New("product value must be greater than 0")
 	}
@@ -64,7 +61,7 @@ func (s *Service) AddProduct(ctx context.Context, product ProductRequest) (*ent.
 }
 
 func (s *Service) ProductsList(ctx context.Context) ([]*ent.Product, error) {
-	products, err := s.client.Product.Query().All(ctx)
+	products, err := s.client.Product.Query().Order(product.ByID()).All(ctx)
 	if err != nil {
 		return nil, err
 	}

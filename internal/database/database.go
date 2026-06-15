@@ -20,8 +20,6 @@ func NewDB() *ent.Client {
 		log.Fatal("Failed to connect to database", err)
 	}
 
-	defer client.Close()
-
 	// Cria tabelas se não existirem
 	if err := client.Schema.Create(context.Background()); err != nil {
 		log.Fatal("Failed to connect to database", err)
