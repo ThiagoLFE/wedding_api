@@ -32,13 +32,20 @@ func NewRouter(handler *handlers.Handler) http.Handler {
 		},
 	}))
 
+	r.MethodNotAllowed(handler.MethodNotAllowed)
+	r.NotFound(handler.NotFound)
+
+	// Rotes
 	r.Get("/", func(w http.ResponseWriter, req *http.Request) {
 		w.Write([]byte("Hello World!"))
 	})
 
-	// Rotas
 	r.Route("/products", func(r chi.Router) {
 		r.Post("/", handler.CreateProduct)
+		r.Get("/", handler.GetProducts)
+		r.Get("/{id}", handler.GetProduct)
+		r.Put("/{id}", handler.UpdateProduct)
+		r.Delete("/{id}", handler.DeleteProduct)
 	})
 
 	return r
