@@ -11,6 +11,7 @@ import (
 
 	"wedding_api/ent/migrate"
 
+	"wedding_api/ent/confirmationpresence"
 	"wedding_api/ent/product"
 
 	"entgo.io/ent"
@@ -23,6 +24,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// ConfirmationPresence is the client for interacting with the ConfirmationPresence builders.
+	ConfirmationPresence *ConfirmationPresenceClient
 	// Product is the client for interacting with the Product builders.
 	Product *ProductClient
 }
@@ -36,6 +39,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.ConfirmationPresence = NewConfirmationPresenceClient(c.config)
 	c.Product = NewProductClient(c.config)
 }
 
@@ -127,9 +131,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:     ctx,
-		config:  cfg,
-		Product: NewProductClient(cfg),
+		ctx:                  ctx,
+		config:               cfg,
+		ConfirmationPresence: NewConfirmationPresenceClient(cfg),
+		Product:              NewProductClient(cfg),
 	}, nil
 }
 
@@ -147,16 +152,17 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:     ctx,
-		config:  cfg,
-		Product: NewProductClient(cfg),
+		ctx:                  ctx,
+		config:               cfg,
+		ConfirmationPresence: NewConfirmationPresenceClient(cfg),
+		Product:              NewProductClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Product.
+//		ConfirmationPresence.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -178,22 +184,159 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.ConfirmationPresence.Use(hooks...)
 	c.Product.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.ConfirmationPresence.Intercept(interceptors...)
 	c.Product.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *ConfirmationPresenceMutation:
+		return c.ConfirmationPresence.mutate(ctx, m)
 	case *ProductMutation:
 		return c.Product.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// ConfirmationPresenceClient is a client for the ConfirmationPresence schema.
+type ConfirmationPresenceClient struct {
+	config
+}
+
+// NewConfirmationPresenceClient returns a client for the ConfirmationPresence from the given config.
+func NewConfirmationPresenceClient(c config) *ConfirmationPresenceClient {
+	return &ConfirmationPresenceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `confirmationpresence.Hooks(f(g(h())))`.
+func (c *ConfirmationPresenceClient) Use(hooks ...Hook) {
+	c.hooks.ConfirmationPresence = append(c.hooks.ConfirmationPresence, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `confirmationpresence.Intercept(f(g(h())))`.
+func (c *ConfirmationPresenceClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ConfirmationPresence = append(c.inters.ConfirmationPresence, interceptors...)
+}
+
+// Create returns a builder for creating a ConfirmationPresence entity.
+func (c *ConfirmationPresenceClient) Create() *ConfirmationPresenceCreate {
+	mutation := newConfirmationPresenceMutation(c.config, OpCreate)
+	return &ConfirmationPresenceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ConfirmationPresence entities.
+func (c *ConfirmationPresenceClient) CreateBulk(builders ...*ConfirmationPresenceCreate) *ConfirmationPresenceCreateBulk {
+	return &ConfirmationPresenceCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ConfirmationPresenceClient) MapCreateBulk(slice any, setFunc func(*ConfirmationPresenceCreate, int)) *ConfirmationPresenceCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ConfirmationPresenceCreateBulk{err: fmt.Errorf("calling to ConfirmationPresenceClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ConfirmationPresenceCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ConfirmationPresenceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ConfirmationPresence.
+func (c *ConfirmationPresenceClient) Update() *ConfirmationPresenceUpdate {
+	mutation := newConfirmationPresenceMutation(c.config, OpUpdate)
+	return &ConfirmationPresenceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ConfirmationPresenceClient) UpdateOne(_m *ConfirmationPresence) *ConfirmationPresenceUpdateOne {
+	mutation := newConfirmationPresenceMutation(c.config, OpUpdateOne, withConfirmationPresence(_m))
+	return &ConfirmationPresenceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ConfirmationPresenceClient) UpdateOneID(id int) *ConfirmationPresenceUpdateOne {
+	mutation := newConfirmationPresenceMutation(c.config, OpUpdateOne, withConfirmationPresenceID(id))
+	return &ConfirmationPresenceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ConfirmationPresence.
+func (c *ConfirmationPresenceClient) Delete() *ConfirmationPresenceDelete {
+	mutation := newConfirmationPresenceMutation(c.config, OpDelete)
+	return &ConfirmationPresenceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ConfirmationPresenceClient) DeleteOne(_m *ConfirmationPresence) *ConfirmationPresenceDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ConfirmationPresenceClient) DeleteOneID(id int) *ConfirmationPresenceDeleteOne {
+	builder := c.Delete().Where(confirmationpresence.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ConfirmationPresenceDeleteOne{builder}
+}
+
+// Query returns a query builder for ConfirmationPresence.
+func (c *ConfirmationPresenceClient) Query() *ConfirmationPresenceQuery {
+	return &ConfirmationPresenceQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeConfirmationPresence},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ConfirmationPresence entity by its id.
+func (c *ConfirmationPresenceClient) Get(ctx context.Context, id int) (*ConfirmationPresence, error) {
+	return c.Query().Where(confirmationpresence.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ConfirmationPresenceClient) GetX(ctx context.Context, id int) *ConfirmationPresence {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ConfirmationPresenceClient) Hooks() []Hook {
+	return c.hooks.ConfirmationPresence
+}
+
+// Interceptors returns the client interceptors.
+func (c *ConfirmationPresenceClient) Interceptors() []Interceptor {
+	return c.inters.ConfirmationPresence
+}
+
+func (c *ConfirmationPresenceClient) mutate(ctx context.Context, m *ConfirmationPresenceMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ConfirmationPresenceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ConfirmationPresenceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ConfirmationPresenceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ConfirmationPresenceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ConfirmationPresence mutation op: %q", m.Op())
 	}
 }
 
@@ -333,9 +476,9 @@ func (c *ProductClient) mutate(ctx context.Context, m *ProductMutation) (Value, 
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Product []ent.Hook
+		ConfirmationPresence, Product []ent.Hook
 	}
 	inters struct {
-		Product []ent.Interceptor
+		ConfirmationPresence, Product []ent.Interceptor
 	}
 )

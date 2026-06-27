@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"wedding_api/ent/confirmationpresence"
 	"wedding_api/ent/product"
 
 	"entgo.io/ent"
@@ -73,7 +74,8 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			product.Table: product.ValidColumn,
+			confirmationpresence.Table: confirmationpresence.ValidColumn,
+			product.Table:              product.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

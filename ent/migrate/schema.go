@@ -8,6 +8,19 @@ import (
 )
 
 var (
+	// ConfirmationPresencesColumns holds the columns for the "confirmation_presences" table.
+	ConfirmationPresencesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "fullname", Type: field.TypeString},
+		{Name: "photo_base64", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "is_confirmed", Type: field.TypeBool, Default: false},
+	}
+	// ConfirmationPresencesTable holds the schema information for the "confirmation_presences" table.
+	ConfirmationPresencesTable = &schema.Table{
+		Name:       "confirmation_presences",
+		Columns:    ConfirmationPresencesColumns,
+		PrimaryKey: []*schema.Column{ConfirmationPresencesColumns[0]},
+	}
 	// ProductsColumns holds the columns for the "products" table.
 	ProductsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -24,6 +37,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		ConfirmationPresencesTable,
 		ProductsTable,
 	}
 )

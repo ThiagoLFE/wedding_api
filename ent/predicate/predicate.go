@@ -6,5 +6,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// ConfirmationPresence is the predicate function for confirmationpresence builders.
+type ConfirmationPresence func(*sql.Selector)
+
 // Product is the predicate function for product builders.
 type Product func(*sql.Selector)

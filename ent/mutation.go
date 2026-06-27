@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"wedding_api/ent/confirmationpresence"
 	"wedding_api/ent/predicate"
 	"wedding_api/ent/product"
 
@@ -23,8 +24,465 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeProduct = "Product"
+	TypeConfirmationPresence = "ConfirmationPresence"
+	TypeProduct              = "Product"
 )
+
+// ConfirmationPresenceMutation represents an operation that mutates the ConfirmationPresence nodes in the graph.
+type ConfirmationPresenceMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	fullname      *string
+	photo_base64  *string
+	is_confirmed  *bool
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*ConfirmationPresence, error)
+	predicates    []predicate.ConfirmationPresence
+}
+
+var _ ent.Mutation = (*ConfirmationPresenceMutation)(nil)
+
+// confirmationpresenceOption allows management of the mutation configuration using functional options.
+type confirmationpresenceOption func(*ConfirmationPresenceMutation)
+
+// newConfirmationPresenceMutation creates new mutation for the ConfirmationPresence entity.
+func newConfirmationPresenceMutation(c config, op Op, opts ...confirmationpresenceOption) *ConfirmationPresenceMutation {
+	m := &ConfirmationPresenceMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeConfirmationPresence,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withConfirmationPresenceID sets the ID field of the mutation.
+func withConfirmationPresenceID(id int) confirmationpresenceOption {
+	return func(m *ConfirmationPresenceMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ConfirmationPresence
+		)
+		m.oldValue = func(ctx context.Context) (*ConfirmationPresence, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ConfirmationPresence.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withConfirmationPresence sets the old ConfirmationPresence of the mutation.
+func withConfirmationPresence(node *ConfirmationPresence) confirmationpresenceOption {
+	return func(m *ConfirmationPresenceMutation) {
+		m.oldValue = func(context.Context) (*ConfirmationPresence, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ConfirmationPresenceMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ConfirmationPresenceMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ConfirmationPresenceMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ConfirmationPresenceMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ConfirmationPresence.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetFullname sets the "fullname" field.
+func (m *ConfirmationPresenceMutation) SetFullname(s string) {
+	m.fullname = &s
+}
+
+// Fullname returns the value of the "fullname" field in the mutation.
+func (m *ConfirmationPresenceMutation) Fullname() (r string, exists bool) {
+	v := m.fullname
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFullname returns the old "fullname" field's value of the ConfirmationPresence entity.
+// If the ConfirmationPresence object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ConfirmationPresenceMutation) OldFullname(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFullname is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFullname requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFullname: %w", err)
+	}
+	return oldValue.Fullname, nil
+}
+
+// ResetFullname resets all changes to the "fullname" field.
+func (m *ConfirmationPresenceMutation) ResetFullname() {
+	m.fullname = nil
+}
+
+// SetPhotoBase64 sets the "photo_base64" field.
+func (m *ConfirmationPresenceMutation) SetPhotoBase64(s string) {
+	m.photo_base64 = &s
+}
+
+// PhotoBase64 returns the value of the "photo_base64" field in the mutation.
+func (m *ConfirmationPresenceMutation) PhotoBase64() (r string, exists bool) {
+	v := m.photo_base64
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPhotoBase64 returns the old "photo_base64" field's value of the ConfirmationPresence entity.
+// If the ConfirmationPresence object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ConfirmationPresenceMutation) OldPhotoBase64(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPhotoBase64 is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPhotoBase64 requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPhotoBase64: %w", err)
+	}
+	return oldValue.PhotoBase64, nil
+}
+
+// ClearPhotoBase64 clears the value of the "photo_base64" field.
+func (m *ConfirmationPresenceMutation) ClearPhotoBase64() {
+	m.photo_base64 = nil
+	m.clearedFields[confirmationpresence.FieldPhotoBase64] = struct{}{}
+}
+
+// PhotoBase64Cleared returns if the "photo_base64" field was cleared in this mutation.
+func (m *ConfirmationPresenceMutation) PhotoBase64Cleared() bool {
+	_, ok := m.clearedFields[confirmationpresence.FieldPhotoBase64]
+	return ok
+}
+
+// ResetPhotoBase64 resets all changes to the "photo_base64" field.
+func (m *ConfirmationPresenceMutation) ResetPhotoBase64() {
+	m.photo_base64 = nil
+	delete(m.clearedFields, confirmationpresence.FieldPhotoBase64)
+}
+
+// SetIsConfirmed sets the "is_confirmed" field.
+func (m *ConfirmationPresenceMutation) SetIsConfirmed(b bool) {
+	m.is_confirmed = &b
+}
+
+// IsConfirmed returns the value of the "is_confirmed" field in the mutation.
+func (m *ConfirmationPresenceMutation) IsConfirmed() (r bool, exists bool) {
+	v := m.is_confirmed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsConfirmed returns the old "is_confirmed" field's value of the ConfirmationPresence entity.
+// If the ConfirmationPresence object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ConfirmationPresenceMutation) OldIsConfirmed(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsConfirmed is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsConfirmed requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsConfirmed: %w", err)
+	}
+	return oldValue.IsConfirmed, nil
+}
+
+// ResetIsConfirmed resets all changes to the "is_confirmed" field.
+func (m *ConfirmationPresenceMutation) ResetIsConfirmed() {
+	m.is_confirmed = nil
+}
+
+// Where appends a list predicates to the ConfirmationPresenceMutation builder.
+func (m *ConfirmationPresenceMutation) Where(ps ...predicate.ConfirmationPresence) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ConfirmationPresenceMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ConfirmationPresenceMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ConfirmationPresence, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ConfirmationPresenceMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ConfirmationPresenceMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (ConfirmationPresence).
+func (m *ConfirmationPresenceMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ConfirmationPresenceMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.fullname != nil {
+		fields = append(fields, confirmationpresence.FieldFullname)
+	}
+	if m.photo_base64 != nil {
+		fields = append(fields, confirmationpresence.FieldPhotoBase64)
+	}
+	if m.is_confirmed != nil {
+		fields = append(fields, confirmationpresence.FieldIsConfirmed)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ConfirmationPresenceMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case confirmationpresence.FieldFullname:
+		return m.Fullname()
+	case confirmationpresence.FieldPhotoBase64:
+		return m.PhotoBase64()
+	case confirmationpresence.FieldIsConfirmed:
+		return m.IsConfirmed()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ConfirmationPresenceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case confirmationpresence.FieldFullname:
+		return m.OldFullname(ctx)
+	case confirmationpresence.FieldPhotoBase64:
+		return m.OldPhotoBase64(ctx)
+	case confirmationpresence.FieldIsConfirmed:
+		return m.OldIsConfirmed(ctx)
+	}
+	return nil, fmt.Errorf("unknown ConfirmationPresence field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ConfirmationPresenceMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case confirmationpresence.FieldFullname:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFullname(v)
+		return nil
+	case confirmationpresence.FieldPhotoBase64:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPhotoBase64(v)
+		return nil
+	case confirmationpresence.FieldIsConfirmed:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsConfirmed(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ConfirmationPresence field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ConfirmationPresenceMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ConfirmationPresenceMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ConfirmationPresenceMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown ConfirmationPresence numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ConfirmationPresenceMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(confirmationpresence.FieldPhotoBase64) {
+		fields = append(fields, confirmationpresence.FieldPhotoBase64)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ConfirmationPresenceMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ConfirmationPresenceMutation) ClearField(name string) error {
+	switch name {
+	case confirmationpresence.FieldPhotoBase64:
+		m.ClearPhotoBase64()
+		return nil
+	}
+	return fmt.Errorf("unknown ConfirmationPresence nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ConfirmationPresenceMutation) ResetField(name string) error {
+	switch name {
+	case confirmationpresence.FieldFullname:
+		m.ResetFullname()
+		return nil
+	case confirmationpresence.FieldPhotoBase64:
+		m.ResetPhotoBase64()
+		return nil
+	case confirmationpresence.FieldIsConfirmed:
+		m.ResetIsConfirmed()
+		return nil
+	}
+	return fmt.Errorf("unknown ConfirmationPresence field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ConfirmationPresenceMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ConfirmationPresenceMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ConfirmationPresenceMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ConfirmationPresenceMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ConfirmationPresenceMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ConfirmationPresenceMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ConfirmationPresenceMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown ConfirmationPresence unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ConfirmationPresenceMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown ConfirmationPresence edge %s", name)
+}
 
 // ProductMutation represents an operation that mutates the Product nodes in the graph.
 type ProductMutation struct {

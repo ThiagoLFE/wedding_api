@@ -2,8 +2,19 @@
 
 package ent
 
+import (
+	"wedding_api/ent/confirmationpresence"
+	"wedding_api/ent/schema"
+)
+
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	confirmationpresenceFields := schema.ConfirmationPresence{}.Fields()
+	_ = confirmationpresenceFields
+	// confirmationpresenceDescIsConfirmed is the schema descriptor for is_confirmed field.
+	confirmationpresenceDescIsConfirmed := confirmationpresenceFields[2].Descriptor()
+	// confirmationpresence.DefaultIsConfirmed holds the default value on creation for the is_confirmed field.
+	confirmationpresence.DefaultIsConfirmed = confirmationpresenceDescIsConfirmed.Default.(bool)
 }

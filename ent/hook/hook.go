@@ -8,6 +8,18 @@ import (
 	"wedding_api/ent"
 )
 
+// The ConfirmationPresenceFunc type is an adapter to allow the use of ordinary
+// function as ConfirmationPresence mutator.
+type ConfirmationPresenceFunc func(context.Context, *ent.ConfirmationPresenceMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ConfirmationPresenceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ConfirmationPresenceMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ConfirmationPresenceMutation", m)
+}
+
 // The ProductFunc type is an adapter to allow the use of ordinary
 // function as Product mutator.
 type ProductFunc func(context.Context, *ent.ProductMutation) (ent.Value, error)
