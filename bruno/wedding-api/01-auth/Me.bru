@@ -1,0 +1,15 @@
+meta {
+  name: Current session
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/auth/me
+  body: none
+  auth: none
+}
+
+docs {
+  Mostra a role e o escopo da sessão atual.
+}

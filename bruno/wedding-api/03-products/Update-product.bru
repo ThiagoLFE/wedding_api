@@ -1,0 +1,28 @@
+meta {
+  name: Update product
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/products/{{productId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "Jogo de pratos atualizado",
+    "reserved_by": "",
+    "image": "https://example.com/pratos-atualizado.jpg",
+    "value": 280.00
+  }
+}
+
+docs {
+  Somente admin. Use esta rota para editar ou liberar uma reserva administrativamente.
+}

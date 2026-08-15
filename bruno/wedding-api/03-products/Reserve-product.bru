@@ -1,0 +1,26 @@
+meta {
+  name: Reserve product
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/api/products/{{productId}}/reserve
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "reserved_by": "{{reservedBy}}"
+  }
+}
+
+docs {
+  Admin ou família autenticados. Famílias não podem sobrescrever uma reserva existente.
+  Para reservar como família, execute antes Auth / Exchange family token.
+}

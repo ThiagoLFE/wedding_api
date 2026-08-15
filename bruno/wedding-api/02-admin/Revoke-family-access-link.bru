@@ -1,0 +1,15 @@
+meta {
+  name: Revoke family access link
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/admin/families/{{familyId}}/access-link/revoke
+  body: none
+  auth: none
+}
+
+docs {
+  Revoga o link da família e todas as sessões existentes associadas a ela.
+}

@@ -1,0 +1,16 @@
+meta {
+  name: Create family access link
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/admin/families/{{familyId}}/access-link
+  body: none
+  auth: none
+}
+
+docs {
+  Revoga o link anterior, revoga as sessões da família e cria um novo link permanente.
+  Copie o token da URL retornada para familyToken.
+}

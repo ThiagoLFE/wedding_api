@@ -1,0 +1,11 @@
+meta {
+  name: Get family
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/admin/families/{{familyId}}
+  body: none
+  auth: none
+}

@@ -1,0 +1,25 @@
+meta {
+  name: Create family
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/admin/families
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Familia Silva"
+  }
+}
+
+docs {
+  Requer sessão de admin. Copie o id retornado para familyId.
+}

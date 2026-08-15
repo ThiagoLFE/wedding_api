@@ -1,0 +1,15 @@
+meta {
+  name: Confirm presence
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/api/presences/{{presenceId}}/confirm
+  body: none
+  auth: none
+}
+
+docs {
+  Admin ou família. A família só pode confirmar uma pessoa da própria família.
+}

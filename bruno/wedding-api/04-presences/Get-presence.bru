@@ -1,0 +1,15 @@
+meta {
+  name: Get presence
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/presences/{{presenceId}}
+  body: none
+  auth: none
+}
+
+docs {
+  Uma família só pode consultar uma pessoa da própria família.
+}

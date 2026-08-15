@@ -1,0 +1,15 @@
+meta {
+  name: Delete family
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/admin/families/{{familyId}}
+  body: none
+  auth: none
+}
+
+docs {
+  Remove a família, suas pessoas, links e sessões associadas.
+}

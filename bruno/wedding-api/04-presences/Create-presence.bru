@@ -1,0 +1,28 @@
+meta {
+  name: Create presence
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/presences
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "family_id": {{familyId}},
+    "fullname": "João da Silva",
+    "photo_base64": "",
+    "is_confirmed": false
+  }
+}
+
+docs {
+  Somente admin. O family_id deve apontar para uma família existente.
+}

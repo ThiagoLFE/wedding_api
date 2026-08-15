@@ -1,0 +1,16 @@
+meta {
+  name: List products
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/products
+  body: none
+  auth: none
+}
+
+docs {
+  Admin e família autenticados podem visualizar os produtos.
+  A rota legada GET /products também existe como alias protegido.
+}

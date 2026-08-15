@@ -1,0 +1,28 @@
+meta {
+  name: Update presence
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/presences/{{presenceId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "family_id": {{familyId}},
+    "fullname": "João da Silva Atualizado",
+    "photo_base64": "",
+    "is_confirmed": true
+  }
+}
+
+docs {
+  Somente admin.
+}

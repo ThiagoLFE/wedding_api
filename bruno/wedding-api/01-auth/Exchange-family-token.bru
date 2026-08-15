@@ -1,0 +1,26 @@
+meta {
+  name: Exchange family token
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/auth/exchange
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "token": "{{familyToken}}"
+  }
+}
+
+docs {
+  Troca o token do link por uma sessão autenticada da família.
+  O token é obtido no response de Admin / Create family access link.
+}

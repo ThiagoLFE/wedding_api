@@ -1,0 +1,28 @@
+meta {
+  name: Create product
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/products
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "Jogo de pratos",
+    "reserved_by": "",
+    "image": "https://example.com/pratos.jpg",
+    "value": 250.00
+  }
+}
+
+docs {
+  Somente admin.
+}

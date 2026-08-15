@@ -1,0 +1,16 @@
+meta {
+  name: Get my family
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/family
+  body: none
+  auth: none
+}
+
+docs {
+  Retorna a família da sessão atual junto com suas pessoas.
+  Disponível para sessões de família.
+}

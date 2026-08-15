@@ -1,0 +1,15 @@
+meta {
+  name: Cancel presence
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{baseUrl}}/api/presences/{{presenceId}}/cancel
+  body: none
+  auth: none
+}
+
+docs {
+  Admin ou família. A família só pode cancelar uma pessoa da própria família.
+}
