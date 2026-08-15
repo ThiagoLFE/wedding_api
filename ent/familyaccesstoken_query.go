@@ -6,8 +6,8 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"wedding_api/ent/confirmationpresence"
 	"wedding_api/ent/family"
+	"wedding_api/ent/familyaccesstoken"
 	"wedding_api/ent/predicate"
 
 	"entgo.io/ent"
@@ -16,13 +16,13 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// ConfirmationPresenceQuery is the builder for querying ConfirmationPresence entities.
-type ConfirmationPresenceQuery struct {
+// FamilyAccessTokenQuery is the builder for querying FamilyAccessToken entities.
+type FamilyAccessTokenQuery struct {
 	config
 	ctx        *QueryContext
-	order      []confirmationpresence.OrderOption
+	order      []familyaccesstoken.OrderOption
 	inters     []Interceptor
-	predicates []predicate.ConfirmationPresence
+	predicates []predicate.FamilyAccessToken
 	withFamily *FamilyQuery
 	withFKs    bool
 	// intermediate query (i.e. traversal path).
@@ -30,39 +30,39 @@ type ConfirmationPresenceQuery struct {
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the ConfirmationPresenceQuery builder.
-func (_q *ConfirmationPresenceQuery) Where(ps ...predicate.ConfirmationPresence) *ConfirmationPresenceQuery {
+// Where adds a new predicate for the FamilyAccessTokenQuery builder.
+func (_q *FamilyAccessTokenQuery) Where(ps ...predicate.FamilyAccessToken) *FamilyAccessTokenQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *ConfirmationPresenceQuery) Limit(limit int) *ConfirmationPresenceQuery {
+func (_q *FamilyAccessTokenQuery) Limit(limit int) *FamilyAccessTokenQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *ConfirmationPresenceQuery) Offset(offset int) *ConfirmationPresenceQuery {
+func (_q *FamilyAccessTokenQuery) Offset(offset int) *FamilyAccessTokenQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *ConfirmationPresenceQuery) Unique(unique bool) *ConfirmationPresenceQuery {
+func (_q *FamilyAccessTokenQuery) Unique(unique bool) *FamilyAccessTokenQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *ConfirmationPresenceQuery) Order(o ...confirmationpresence.OrderOption) *ConfirmationPresenceQuery {
+func (_q *FamilyAccessTokenQuery) Order(o ...familyaccesstoken.OrderOption) *FamilyAccessTokenQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
 // QueryFamily chains the current query on the "family" edge.
-func (_q *ConfirmationPresenceQuery) QueryFamily() *FamilyQuery {
+func (_q *FamilyAccessTokenQuery) QueryFamily() *FamilyQuery {
 	query := (&FamilyClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -73,9 +73,9 @@ func (_q *ConfirmationPresenceQuery) QueryFamily() *FamilyQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(confirmationpresence.Table, confirmationpresence.FieldID, selector),
+			sqlgraph.From(familyaccesstoken.Table, familyaccesstoken.FieldID, selector),
 			sqlgraph.To(family.Table, family.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, confirmationpresence.FamilyTable, confirmationpresence.FamilyColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, familyaccesstoken.FamilyTable, familyaccesstoken.FamilyColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -83,21 +83,21 @@ func (_q *ConfirmationPresenceQuery) QueryFamily() *FamilyQuery {
 	return query
 }
 
-// First returns the first ConfirmationPresence entity from the query.
-// Returns a *NotFoundError when no ConfirmationPresence was found.
-func (_q *ConfirmationPresenceQuery) First(ctx context.Context) (*ConfirmationPresence, error) {
+// First returns the first FamilyAccessToken entity from the query.
+// Returns a *NotFoundError when no FamilyAccessToken was found.
+func (_q *FamilyAccessTokenQuery) First(ctx context.Context) (*FamilyAccessToken, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{confirmationpresence.Label}
+		return nil, &NotFoundError{familyaccesstoken.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *ConfirmationPresenceQuery) FirstX(ctx context.Context) *ConfirmationPresence {
+func (_q *FamilyAccessTokenQuery) FirstX(ctx context.Context) *FamilyAccessToken {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -105,22 +105,22 @@ func (_q *ConfirmationPresenceQuery) FirstX(ctx context.Context) *ConfirmationPr
 	return node
 }
 
-// FirstID returns the first ConfirmationPresence ID from the query.
-// Returns a *NotFoundError when no ConfirmationPresence ID was found.
-func (_q *ConfirmationPresenceQuery) FirstID(ctx context.Context) (id int, err error) {
+// FirstID returns the first FamilyAccessToken ID from the query.
+// Returns a *NotFoundError when no FamilyAccessToken ID was found.
+func (_q *FamilyAccessTokenQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{confirmationpresence.Label}
+		err = &NotFoundError{familyaccesstoken.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *ConfirmationPresenceQuery) FirstIDX(ctx context.Context) int {
+func (_q *FamilyAccessTokenQuery) FirstIDX(ctx context.Context) int {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -128,10 +128,10 @@ func (_q *ConfirmationPresenceQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns a single ConfirmationPresence entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one ConfirmationPresence entity is found.
-// Returns a *NotFoundError when no ConfirmationPresence entities are found.
-func (_q *ConfirmationPresenceQuery) Only(ctx context.Context) (*ConfirmationPresence, error) {
+// Only returns a single FamilyAccessToken entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one FamilyAccessToken entity is found.
+// Returns a *NotFoundError when no FamilyAccessToken entities are found.
+func (_q *FamilyAccessTokenQuery) Only(ctx context.Context) (*FamilyAccessToken, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -140,14 +140,14 @@ func (_q *ConfirmationPresenceQuery) Only(ctx context.Context) (*ConfirmationPre
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{confirmationpresence.Label}
+		return nil, &NotFoundError{familyaccesstoken.Label}
 	default:
-		return nil, &NotSingularError{confirmationpresence.Label}
+		return nil, &NotSingularError{familyaccesstoken.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *ConfirmationPresenceQuery) OnlyX(ctx context.Context) *ConfirmationPresence {
+func (_q *FamilyAccessTokenQuery) OnlyX(ctx context.Context) *FamilyAccessToken {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -155,10 +155,10 @@ func (_q *ConfirmationPresenceQuery) OnlyX(ctx context.Context) *ConfirmationPre
 	return node
 }
 
-// OnlyID is like Only, but returns the only ConfirmationPresence ID in the query.
-// Returns a *NotSingularError when more than one ConfirmationPresence ID is found.
+// OnlyID is like Only, but returns the only FamilyAccessToken ID in the query.
+// Returns a *NotSingularError when more than one FamilyAccessToken ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *ConfirmationPresenceQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *FamilyAccessTokenQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -167,15 +167,15 @@ func (_q *ConfirmationPresenceQuery) OnlyID(ctx context.Context) (id int, err er
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{confirmationpresence.Label}
+		err = &NotFoundError{familyaccesstoken.Label}
 	default:
-		err = &NotSingularError{confirmationpresence.Label}
+		err = &NotSingularError{familyaccesstoken.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *ConfirmationPresenceQuery) OnlyIDX(ctx context.Context) int {
+func (_q *FamilyAccessTokenQuery) OnlyIDX(ctx context.Context) int {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -183,18 +183,18 @@ func (_q *ConfirmationPresenceQuery) OnlyIDX(ctx context.Context) int {
 	return id
 }
 
-// All executes the query and returns a list of ConfirmationPresences.
-func (_q *ConfirmationPresenceQuery) All(ctx context.Context) ([]*ConfirmationPresence, error) {
+// All executes the query and returns a list of FamilyAccessTokens.
+func (_q *FamilyAccessTokenQuery) All(ctx context.Context) ([]*FamilyAccessToken, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*ConfirmationPresence, *ConfirmationPresenceQuery]()
-	return withInterceptors[[]*ConfirmationPresence](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*FamilyAccessToken, *FamilyAccessTokenQuery]()
+	return withInterceptors[[]*FamilyAccessToken](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *ConfirmationPresenceQuery) AllX(ctx context.Context) []*ConfirmationPresence {
+func (_q *FamilyAccessTokenQuery) AllX(ctx context.Context) []*FamilyAccessToken {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -202,20 +202,20 @@ func (_q *ConfirmationPresenceQuery) AllX(ctx context.Context) []*ConfirmationPr
 	return nodes
 }
 
-// IDs executes the query and returns a list of ConfirmationPresence IDs.
-func (_q *ConfirmationPresenceQuery) IDs(ctx context.Context) (ids []int, err error) {
+// IDs executes the query and returns a list of FamilyAccessToken IDs.
+func (_q *FamilyAccessTokenQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(confirmationpresence.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(familyaccesstoken.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *ConfirmationPresenceQuery) IDsX(ctx context.Context) []int {
+func (_q *FamilyAccessTokenQuery) IDsX(ctx context.Context) []int {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -224,16 +224,16 @@ func (_q *ConfirmationPresenceQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (_q *ConfirmationPresenceQuery) Count(ctx context.Context) (int, error) {
+func (_q *FamilyAccessTokenQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*ConfirmationPresenceQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*FamilyAccessTokenQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *ConfirmationPresenceQuery) CountX(ctx context.Context) int {
+func (_q *FamilyAccessTokenQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -242,7 +242,7 @@ func (_q *ConfirmationPresenceQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *ConfirmationPresenceQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *FamilyAccessTokenQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -255,7 +255,7 @@ func (_q *ConfirmationPresenceQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *ConfirmationPresenceQuery) ExistX(ctx context.Context) bool {
+func (_q *FamilyAccessTokenQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -263,18 +263,18 @@ func (_q *ConfirmationPresenceQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the ConfirmationPresenceQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the FamilyAccessTokenQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *ConfirmationPresenceQuery) Clone() *ConfirmationPresenceQuery {
+func (_q *FamilyAccessTokenQuery) Clone() *FamilyAccessTokenQuery {
 	if _q == nil {
 		return nil
 	}
-	return &ConfirmationPresenceQuery{
+	return &FamilyAccessTokenQuery{
 		config:     _q.config,
 		ctx:        _q.ctx.Clone(),
-		order:      append([]confirmationpresence.OrderOption{}, _q.order...),
+		order:      append([]familyaccesstoken.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.ConfirmationPresence{}, _q.predicates...),
+		predicates: append([]predicate.FamilyAccessToken{}, _q.predicates...),
 		withFamily: _q.withFamily.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
@@ -284,7 +284,7 @@ func (_q *ConfirmationPresenceQuery) Clone() *ConfirmationPresenceQuery {
 
 // WithFamily tells the query-builder to eager-load the nodes that are connected to
 // the "family" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *ConfirmationPresenceQuery) WithFamily(opts ...func(*FamilyQuery)) *ConfirmationPresenceQuery {
+func (_q *FamilyAccessTokenQuery) WithFamily(opts ...func(*FamilyQuery)) *FamilyAccessTokenQuery {
 	query := (&FamilyClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
@@ -299,19 +299,19 @@ func (_q *ConfirmationPresenceQuery) WithFamily(opts ...func(*FamilyQuery)) *Con
 // Example:
 //
 //	var v []struct {
-//		Fullname string `json:"fullname,omitempty"`
+//		TokenHash string `json:"token_hash,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.ConfirmationPresence.Query().
-//		GroupBy(confirmationpresence.FieldFullname).
+//	client.FamilyAccessToken.Query().
+//		GroupBy(familyaccesstoken.FieldTokenHash).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (_q *ConfirmationPresenceQuery) GroupBy(field string, fields ...string) *ConfirmationPresenceGroupBy {
+func (_q *FamilyAccessTokenQuery) GroupBy(field string, fields ...string) *FamilyAccessTokenGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &ConfirmationPresenceGroupBy{build: _q}
+	grbuild := &FamilyAccessTokenGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = confirmationpresence.Label
+	grbuild.label = familyaccesstoken.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -322,26 +322,26 @@ func (_q *ConfirmationPresenceQuery) GroupBy(field string, fields ...string) *Co
 // Example:
 //
 //	var v []struct {
-//		Fullname string `json:"fullname,omitempty"`
+//		TokenHash string `json:"token_hash,omitempty"`
 //	}
 //
-//	client.ConfirmationPresence.Query().
-//		Select(confirmationpresence.FieldFullname).
+//	client.FamilyAccessToken.Query().
+//		Select(familyaccesstoken.FieldTokenHash).
 //		Scan(ctx, &v)
-func (_q *ConfirmationPresenceQuery) Select(fields ...string) *ConfirmationPresenceSelect {
+func (_q *FamilyAccessTokenQuery) Select(fields ...string) *FamilyAccessTokenSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &ConfirmationPresenceSelect{ConfirmationPresenceQuery: _q}
-	sbuild.label = confirmationpresence.Label
+	sbuild := &FamilyAccessTokenSelect{FamilyAccessTokenQuery: _q}
+	sbuild.label = familyaccesstoken.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a ConfirmationPresenceSelect configured with the given aggregations.
-func (_q *ConfirmationPresenceQuery) Aggregate(fns ...AggregateFunc) *ConfirmationPresenceSelect {
+// Aggregate returns a FamilyAccessTokenSelect configured with the given aggregations.
+func (_q *FamilyAccessTokenQuery) Aggregate(fns ...AggregateFunc) *FamilyAccessTokenSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *ConfirmationPresenceQuery) prepareQuery(ctx context.Context) error {
+func (_q *FamilyAccessTokenQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
@@ -353,7 +353,7 @@ func (_q *ConfirmationPresenceQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !confirmationpresence.ValidColumn(f) {
+		if !familyaccesstoken.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
@@ -367,9 +367,9 @@ func (_q *ConfirmationPresenceQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *ConfirmationPresenceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*ConfirmationPresence, error) {
+func (_q *FamilyAccessTokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*FamilyAccessToken, error) {
 	var (
-		nodes       = []*ConfirmationPresence{}
+		nodes       = []*FamilyAccessToken{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
 		loadedTypes = [1]bool{
@@ -380,13 +380,13 @@ func (_q *ConfirmationPresenceQuery) sqlAll(ctx context.Context, hooks ...queryH
 		withFKs = true
 	}
 	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, confirmationpresence.ForeignKeys...)
+		_spec.Node.Columns = append(_spec.Node.Columns, familyaccesstoken.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*ConfirmationPresence).scanValues(nil, columns)
+		return (*FamilyAccessToken).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &ConfirmationPresence{config: _q.config}
+		node := &FamilyAccessToken{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -402,21 +402,21 @@ func (_q *ConfirmationPresenceQuery) sqlAll(ctx context.Context, hooks ...queryH
 	}
 	if query := _q.withFamily; query != nil {
 		if err := _q.loadFamily(ctx, query, nodes, nil,
-			func(n *ConfirmationPresence, e *Family) { n.Edges.Family = e }); err != nil {
+			func(n *FamilyAccessToken, e *Family) { n.Edges.Family = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *ConfirmationPresenceQuery) loadFamily(ctx context.Context, query *FamilyQuery, nodes []*ConfirmationPresence, init func(*ConfirmationPresence), assign func(*ConfirmationPresence, *Family)) error {
+func (_q *FamilyAccessTokenQuery) loadFamily(ctx context.Context, query *FamilyQuery, nodes []*FamilyAccessToken, init func(*FamilyAccessToken), assign func(*FamilyAccessToken, *Family)) error {
 	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*ConfirmationPresence)
+	nodeids := make(map[int][]*FamilyAccessToken)
 	for i := range nodes {
-		if nodes[i].family_presences == nil {
+		if nodes[i].family_access_tokens == nil {
 			continue
 		}
-		fk := *nodes[i].family_presences
+		fk := *nodes[i].family_access_tokens
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -433,7 +433,7 @@ func (_q *ConfirmationPresenceQuery) loadFamily(ctx context.Context, query *Fami
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "family_presences" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "family_access_tokens" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -442,7 +442,7 @@ func (_q *ConfirmationPresenceQuery) loadFamily(ctx context.Context, query *Fami
 	return nil
 }
 
-func (_q *ConfirmationPresenceQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *FamilyAccessTokenQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -451,8 +451,8 @@ func (_q *ConfirmationPresenceQuery) sqlCount(ctx context.Context) (int, error) 
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *ConfirmationPresenceQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(confirmationpresence.Table, confirmationpresence.Columns, sqlgraph.NewFieldSpec(confirmationpresence.FieldID, field.TypeInt))
+func (_q *FamilyAccessTokenQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(familyaccesstoken.Table, familyaccesstoken.Columns, sqlgraph.NewFieldSpec(familyaccesstoken.FieldID, field.TypeInt))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -461,9 +461,9 @@ func (_q *ConfirmationPresenceQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, confirmationpresence.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, familyaccesstoken.FieldID)
 		for i := range fields {
-			if fields[i] != confirmationpresence.FieldID {
+			if fields[i] != familyaccesstoken.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
@@ -491,12 +491,12 @@ func (_q *ConfirmationPresenceQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *ConfirmationPresenceQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *FamilyAccessTokenQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(confirmationpresence.Table)
+	t1 := builder.Table(familyaccesstoken.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = confirmationpresence.Columns
+		columns = familyaccesstoken.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -523,28 +523,28 @@ func (_q *ConfirmationPresenceQuery) sqlQuery(ctx context.Context) *sql.Selector
 	return selector
 }
 
-// ConfirmationPresenceGroupBy is the group-by builder for ConfirmationPresence entities.
-type ConfirmationPresenceGroupBy struct {
+// FamilyAccessTokenGroupBy is the group-by builder for FamilyAccessToken entities.
+type FamilyAccessTokenGroupBy struct {
 	selector
-	build *ConfirmationPresenceQuery
+	build *FamilyAccessTokenQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *ConfirmationPresenceGroupBy) Aggregate(fns ...AggregateFunc) *ConfirmationPresenceGroupBy {
+func (_g *FamilyAccessTokenGroupBy) Aggregate(fns ...AggregateFunc) *FamilyAccessTokenGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *ConfirmationPresenceGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *FamilyAccessTokenGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ConfirmationPresenceQuery, *ConfirmationPresenceGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*FamilyAccessTokenQuery, *FamilyAccessTokenGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *ConfirmationPresenceGroupBy) sqlScan(ctx context.Context, root *ConfirmationPresenceQuery, v any) error {
+func (_g *FamilyAccessTokenGroupBy) sqlScan(ctx context.Context, root *FamilyAccessTokenQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -571,28 +571,28 @@ func (_g *ConfirmationPresenceGroupBy) sqlScan(ctx context.Context, root *Confir
 	return sql.ScanSlice(rows, v)
 }
 
-// ConfirmationPresenceSelect is the builder for selecting fields of ConfirmationPresence entities.
-type ConfirmationPresenceSelect struct {
-	*ConfirmationPresenceQuery
+// FamilyAccessTokenSelect is the builder for selecting fields of FamilyAccessToken entities.
+type FamilyAccessTokenSelect struct {
+	*FamilyAccessTokenQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *ConfirmationPresenceSelect) Aggregate(fns ...AggregateFunc) *ConfirmationPresenceSelect {
+func (_s *FamilyAccessTokenSelect) Aggregate(fns ...AggregateFunc) *FamilyAccessTokenSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *ConfirmationPresenceSelect) Scan(ctx context.Context, v any) error {
+func (_s *FamilyAccessTokenSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ConfirmationPresenceQuery, *ConfirmationPresenceSelect](ctx, _s.ConfirmationPresenceQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*FamilyAccessTokenQuery, *FamilyAccessTokenSelect](ctx, _s.FamilyAccessTokenQuery, _s, _s.inters, v)
 }
 
-func (_s *ConfirmationPresenceSelect) sqlScan(ctx context.Context, root *ConfirmationPresenceQuery, v any) error {
+func (_s *FamilyAccessTokenSelect) sqlScan(ctx context.Context, root *FamilyAccessTokenQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

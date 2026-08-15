@@ -10,12 +10,14 @@ import (
 	"testing"
 
 	"wedding_api/ent"
+	"wedding_api/internal/auth"
 	"wedding_api/internal/handlers"
 	"wedding_api/internal/router"
 	"wedding_api/internal/service"
 )
 
 type fakeService struct {
+	principalRole      string
 	addProductReq      service.ProductRequest
 	updateProductReq   service.UpdateProduct
 	addPresenceReq     service.ConfirmationPresenceRequest
@@ -67,6 +69,11 @@ func (f *fakeService) UpdateProduct(_ context.Context, newProduct service.Update
 	return f.updateProductResp, f.updateProductErr
 }
 
+func (f *fakeService) ReserveProduct(_ context.Context, id int, reservedBy string) (*ent.Product, error) {
+	f.updateProductReq = service.UpdateProduct{ID: id, ProductRequest: service.ProductRequest{ReservedBy: reservedBy}}
+	return f.productResp, f.productErr
+}
+
 func (f *fakeService) DeleteProduct(_ context.Context, id int) error {
 	f.deleteProductID = id
 	return f.deleteProductErr
@@ -104,6 +111,68 @@ func (f *fakeService) CancelPresence(_ context.Context, id int) (*ent.Confirmati
 func (f *fakeService) DeleteConfirmationPresence(_ context.Context, id int) error {
 	f.deletePresenceID = id
 	return f.deletePresenceErr
+}
+
+func (f *fakeService) AdminLogin(context.Context, service.AdminLoginRequest) (*service.LoginResult, error) {
+	return nil, nil
+}
+
+func (f *fakeService) ExchangeFamilyToken(context.Context, string) (*service.LoginResult, error) {
+	return nil, nil
+}
+
+func (f *fakeService) Logout(context.Context, string) error { return nil }
+
+func (f *fakeService) CreateFamily(context.Context, service.FamilyRequest) (*ent.Family, error) {
+	return nil, nil
+}
+
+func (f *fakeService) FamiliesList(context.Context) ([]*ent.Family, error) { return nil, nil }
+
+func (f *fakeService) GetFamily(context.Context, int) (*ent.Family, error) { return nil, nil }
+
+func (f *fakeService) GetMyFamily(context.Context) (*ent.Family, error) { return nil, nil }
+
+func (f *fakeService) UpdateFamily(context.Context, int, service.FamilyRequest) (*ent.Family, error) {
+	return nil, nil
+}
+
+func (f *fakeService) DeleteFamily(context.Context, int) error { return nil }
+
+func (f *fakeService) CreateFamilyAccessLink(context.Context, int) (string, error) { return "", nil }
+
+func (f *fakeService) RevokeFamilyAccessLink(context.Context, int) error { return nil }
+
+func (f *fakeService) AuthenticateSession(context.Context, string) (*auth.Principal, error) {
+	role := f.principalRole
+	if role == "" {
+		role = auth.RoleAdmin
+	}
+	return &auth.Principal{Role: role, SessionID: 1}, nil
+}
+
+func TestProtectedRoutesRequireSession(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/api/products", nil)
+	rec := httptest.NewRecorder()
+
+	router.NewRouter(handlers.NewHandler(&fakeService{})).ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusUnauthorized)
+	}
+}
+
+func TestFamilyCannotUseAdminRoutes(t *testing.T) {
+	fake := &fakeService{principalRole: auth.RoleFamily}
+	req := httptest.NewRequest(http.MethodGet, "/api/admin/families", nil)
+	req.AddCookie(&http.Cookie{Name: auth.SessionCookieName, Value: "test-session"})
+	rec := httptest.NewRecorder()
+
+	router.NewRouter(handlers.NewHandler(fake)).ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusForbidden {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusForbidden)
+	}
 }
 
 func TestAPIEndpoints(t *testing.T) {
@@ -373,6 +442,7 @@ func TestAPIEndpoints(t *testing.T) {
 			}
 
 			req := httptest.NewRequest(tc.method, tc.path, strings.NewReader(tc.body))
+			req.AddCookie(&http.Cookie{Name: auth.SessionCookieName, Value: "test-session"})
 			if tc.body != "" {
 				req.Header.Set("Content-Type", "application/json")
 			}
@@ -393,6 +463,7 @@ func TestAPIEndpoints(t *testing.T) {
 func TestCreatePresenceRejectsInvalidJSON(t *testing.T) {
 	fake := &fakeService{}
 	req := httptest.NewRequest(http.MethodPost, "/api/presences", strings.NewReader(`{"fullname":`))
+	req.AddCookie(&http.Cookie{Name: auth.SessionCookieName, Value: "test-session"})
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 
@@ -417,6 +488,7 @@ func TestFakeServiceImplementsHandlerAPI(t *testing.T) {
 func TestLegacyRoutesMirrorAPI(t *testing.T) {
 	fake := &fakeService{productsResp: []*ent.Product{{ID: 1, Title: "Mesa", Image: "img", Value: 10}}}
 	req := httptest.NewRequest(http.MethodGet, "/products", nil)
+	req.AddCookie(&http.Cookie{Name: auth.SessionCookieName, Value: "test-session"})
 	rec := httptest.NewRecorder()
 
 	router.NewRouter(handlers.NewHandler(fake)).ServeHTTP(rec, req)

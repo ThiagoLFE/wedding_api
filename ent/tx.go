@@ -14,8 +14,16 @@ type Tx struct {
 	config
 	// ConfirmationPresence is the client for interacting with the ConfirmationPresence builders.
 	ConfirmationPresence *ConfirmationPresenceClient
+	// Family is the client for interacting with the Family builders.
+	Family *FamilyClient
+	// FamilyAccessToken is the client for interacting with the FamilyAccessToken builders.
+	FamilyAccessToken *FamilyAccessTokenClient
 	// Product is the client for interacting with the Product builders.
 	Product *ProductClient
+	// Session is the client for interacting with the Session builders.
+	Session *SessionClient
+	// User is the client for interacting with the User builders.
+	User *UserClient
 
 	// lazily loaded.
 	client     *Client
@@ -148,7 +156,11 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.ConfirmationPresence = NewConfirmationPresenceClient(tx.config)
+	tx.Family = NewFamilyClient(tx.config)
+	tx.FamilyAccessToken = NewFamilyAccessTokenClient(tx.config)
 	tx.Product = NewProductClient(tx.config)
+	tx.Session = NewSessionClient(tx.config)
+	tx.User = NewUserClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

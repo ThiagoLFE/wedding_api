@@ -9,5 +9,17 @@ import (
 // ConfirmationPresence is the predicate function for confirmationpresence builders.
 type ConfirmationPresence func(*sql.Selector)
 
+// Family is the predicate function for family builders.
+type Family func(*sql.Selector)
+
+// FamilyAccessToken is the predicate function for familyaccesstoken builders.
+type FamilyAccessToken func(*sql.Selector)
+
 // Product is the predicate function for product builders.
 type Product func(*sql.Selector)
+
+// Session is the predicate function for session builders.
+type Session func(*sql.Selector)
+
+// User is the predicate function for user builders.
+type User func(*sql.Selector)

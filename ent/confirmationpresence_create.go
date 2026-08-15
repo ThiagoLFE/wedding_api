@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"wedding_api/ent/confirmationpresence"
+	"wedding_api/ent/family"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -51,6 +52,25 @@ func (_c *ConfirmationPresenceCreate) SetNillableIsConfirmed(v *bool) *Confirmat
 		_c.SetIsConfirmed(*v)
 	}
 	return _c
+}
+
+// SetFamilyID sets the "family" edge to the Family entity by ID.
+func (_c *ConfirmationPresenceCreate) SetFamilyID(id int) *ConfirmationPresenceCreate {
+	_c.mutation.SetFamilyID(id)
+	return _c
+}
+
+// SetNillableFamilyID sets the "family" edge to the Family entity by ID if the given value is not nil.
+func (_c *ConfirmationPresenceCreate) SetNillableFamilyID(id *int) *ConfirmationPresenceCreate {
+	if id != nil {
+		_c = _c.SetFamilyID(*id)
+	}
+	return _c
+}
+
+// SetFamily sets the "family" edge to the Family entity.
+func (_c *ConfirmationPresenceCreate) SetFamily(v *Family) *ConfirmationPresenceCreate {
+	return _c.SetFamilyID(v.ID)
 }
 
 // Mutation returns the ConfirmationPresenceMutation object of the builder.
@@ -139,6 +159,23 @@ func (_c *ConfirmationPresenceCreate) createSpec() (*ConfirmationPresence, *sqlg
 	if value, ok := _c.mutation.IsConfirmed(); ok {
 		_spec.SetField(confirmationpresence.FieldIsConfirmed, field.TypeBool, value)
 		_node.IsConfirmed = value
+	}
+	if nodes := _c.mutation.FamilyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   confirmationpresence.FamilyTable,
+			Columns: []string{confirmationpresence.FamilyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(family.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.family_presences = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

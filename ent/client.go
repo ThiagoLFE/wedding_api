@@ -12,11 +12,16 @@ import (
 	"wedding_api/ent/migrate"
 
 	"wedding_api/ent/confirmationpresence"
+	"wedding_api/ent/family"
+	"wedding_api/ent/familyaccesstoken"
 	"wedding_api/ent/product"
+	"wedding_api/ent/session"
+	"wedding_api/ent/user"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -26,8 +31,16 @@ type Client struct {
 	Schema *migrate.Schema
 	// ConfirmationPresence is the client for interacting with the ConfirmationPresence builders.
 	ConfirmationPresence *ConfirmationPresenceClient
+	// Family is the client for interacting with the Family builders.
+	Family *FamilyClient
+	// FamilyAccessToken is the client for interacting with the FamilyAccessToken builders.
+	FamilyAccessToken *FamilyAccessTokenClient
 	// Product is the client for interacting with the Product builders.
 	Product *ProductClient
+	// Session is the client for interacting with the Session builders.
+	Session *SessionClient
+	// User is the client for interacting with the User builders.
+	User *UserClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -40,7 +53,11 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.ConfirmationPresence = NewConfirmationPresenceClient(c.config)
+	c.Family = NewFamilyClient(c.config)
+	c.FamilyAccessToken = NewFamilyAccessTokenClient(c.config)
 	c.Product = NewProductClient(c.config)
+	c.Session = NewSessionClient(c.config)
+	c.User = NewUserClient(c.config)
 }
 
 type (
@@ -134,7 +151,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:                  ctx,
 		config:               cfg,
 		ConfirmationPresence: NewConfirmationPresenceClient(cfg),
+		Family:               NewFamilyClient(cfg),
+		FamilyAccessToken:    NewFamilyAccessTokenClient(cfg),
 		Product:              NewProductClient(cfg),
+		Session:              NewSessionClient(cfg),
+		User:                 NewUserClient(cfg),
 	}, nil
 }
 
@@ -155,7 +176,11 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:                  ctx,
 		config:               cfg,
 		ConfirmationPresence: NewConfirmationPresenceClient(cfg),
+		Family:               NewFamilyClient(cfg),
+		FamilyAccessToken:    NewFamilyAccessTokenClient(cfg),
 		Product:              NewProductClient(cfg),
+		Session:              NewSessionClient(cfg),
+		User:                 NewUserClient(cfg),
 	}, nil
 }
 
@@ -184,15 +209,23 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.ConfirmationPresence.Use(hooks...)
-	c.Product.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.ConfirmationPresence, c.Family, c.FamilyAccessToken, c.Product, c.Session,
+		c.User,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.ConfirmationPresence.Intercept(interceptors...)
-	c.Product.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.ConfirmationPresence, c.Family, c.FamilyAccessToken, c.Product, c.Session,
+		c.User,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -200,8 +233,16 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *ConfirmationPresenceMutation:
 		return c.ConfirmationPresence.mutate(ctx, m)
+	case *FamilyMutation:
+		return c.Family.mutate(ctx, m)
+	case *FamilyAccessTokenMutation:
+		return c.FamilyAccessToken.mutate(ctx, m)
 	case *ProductMutation:
 		return c.Product.mutate(ctx, m)
+	case *SessionMutation:
+		return c.Session.mutate(ctx, m)
+	case *UserMutation:
+		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -315,6 +356,22 @@ func (c *ConfirmationPresenceClient) GetX(ctx context.Context, id int) *Confirma
 	return obj
 }
 
+// QueryFamily queries the family edge of a ConfirmationPresence.
+func (c *ConfirmationPresenceClient) QueryFamily(_m *ConfirmationPresence) *FamilyQuery {
+	query := (&FamilyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(confirmationpresence.Table, confirmationpresence.FieldID, id),
+			sqlgraph.To(family.Table, family.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, confirmationpresence.FamilyTable, confirmationpresence.FamilyColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ConfirmationPresenceClient) Hooks() []Hook {
 	return c.hooks.ConfirmationPresence
@@ -337,6 +394,336 @@ func (c *ConfirmationPresenceClient) mutate(ctx context.Context, m *Confirmation
 		return (&ConfirmationPresenceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown ConfirmationPresence mutation op: %q", m.Op())
+	}
+}
+
+// FamilyClient is a client for the Family schema.
+type FamilyClient struct {
+	config
+}
+
+// NewFamilyClient returns a client for the Family from the given config.
+func NewFamilyClient(c config) *FamilyClient {
+	return &FamilyClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `family.Hooks(f(g(h())))`.
+func (c *FamilyClient) Use(hooks ...Hook) {
+	c.hooks.Family = append(c.hooks.Family, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `family.Intercept(f(g(h())))`.
+func (c *FamilyClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Family = append(c.inters.Family, interceptors...)
+}
+
+// Create returns a builder for creating a Family entity.
+func (c *FamilyClient) Create() *FamilyCreate {
+	mutation := newFamilyMutation(c.config, OpCreate)
+	return &FamilyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Family entities.
+func (c *FamilyClient) CreateBulk(builders ...*FamilyCreate) *FamilyCreateBulk {
+	return &FamilyCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *FamilyClient) MapCreateBulk(slice any, setFunc func(*FamilyCreate, int)) *FamilyCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &FamilyCreateBulk{err: fmt.Errorf("calling to FamilyClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*FamilyCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &FamilyCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Family.
+func (c *FamilyClient) Update() *FamilyUpdate {
+	mutation := newFamilyMutation(c.config, OpUpdate)
+	return &FamilyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FamilyClient) UpdateOne(_m *Family) *FamilyUpdateOne {
+	mutation := newFamilyMutation(c.config, OpUpdateOne, withFamily(_m))
+	return &FamilyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FamilyClient) UpdateOneID(id int) *FamilyUpdateOne {
+	mutation := newFamilyMutation(c.config, OpUpdateOne, withFamilyID(id))
+	return &FamilyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Family.
+func (c *FamilyClient) Delete() *FamilyDelete {
+	mutation := newFamilyMutation(c.config, OpDelete)
+	return &FamilyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FamilyClient) DeleteOne(_m *Family) *FamilyDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FamilyClient) DeleteOneID(id int) *FamilyDeleteOne {
+	builder := c.Delete().Where(family.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FamilyDeleteOne{builder}
+}
+
+// Query returns a query builder for Family.
+func (c *FamilyClient) Query() *FamilyQuery {
+	return &FamilyQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeFamily},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Family entity by its id.
+func (c *FamilyClient) Get(ctx context.Context, id int) (*Family, error) {
+	return c.Query().Where(family.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FamilyClient) GetX(ctx context.Context, id int) *Family {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPresences queries the presences edge of a Family.
+func (c *FamilyClient) QueryPresences(_m *Family) *ConfirmationPresenceQuery {
+	query := (&ConfirmationPresenceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(family.Table, family.FieldID, id),
+			sqlgraph.To(confirmationpresence.Table, confirmationpresence.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, family.PresencesTable, family.PresencesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAccessTokens queries the access_tokens edge of a Family.
+func (c *FamilyClient) QueryAccessTokens(_m *Family) *FamilyAccessTokenQuery {
+	query := (&FamilyAccessTokenClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(family.Table, family.FieldID, id),
+			sqlgraph.To(familyaccesstoken.Table, familyaccesstoken.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, family.AccessTokensTable, family.AccessTokensColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySessions queries the sessions edge of a Family.
+func (c *FamilyClient) QuerySessions(_m *Family) *SessionQuery {
+	query := (&SessionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(family.Table, family.FieldID, id),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, family.SessionsTable, family.SessionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *FamilyClient) Hooks() []Hook {
+	return c.hooks.Family
+}
+
+// Interceptors returns the client interceptors.
+func (c *FamilyClient) Interceptors() []Interceptor {
+	return c.inters.Family
+}
+
+func (c *FamilyClient) mutate(ctx context.Context, m *FamilyMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FamilyCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FamilyUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FamilyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FamilyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Family mutation op: %q", m.Op())
+	}
+}
+
+// FamilyAccessTokenClient is a client for the FamilyAccessToken schema.
+type FamilyAccessTokenClient struct {
+	config
+}
+
+// NewFamilyAccessTokenClient returns a client for the FamilyAccessToken from the given config.
+func NewFamilyAccessTokenClient(c config) *FamilyAccessTokenClient {
+	return &FamilyAccessTokenClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `familyaccesstoken.Hooks(f(g(h())))`.
+func (c *FamilyAccessTokenClient) Use(hooks ...Hook) {
+	c.hooks.FamilyAccessToken = append(c.hooks.FamilyAccessToken, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `familyaccesstoken.Intercept(f(g(h())))`.
+func (c *FamilyAccessTokenClient) Intercept(interceptors ...Interceptor) {
+	c.inters.FamilyAccessToken = append(c.inters.FamilyAccessToken, interceptors...)
+}
+
+// Create returns a builder for creating a FamilyAccessToken entity.
+func (c *FamilyAccessTokenClient) Create() *FamilyAccessTokenCreate {
+	mutation := newFamilyAccessTokenMutation(c.config, OpCreate)
+	return &FamilyAccessTokenCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of FamilyAccessToken entities.
+func (c *FamilyAccessTokenClient) CreateBulk(builders ...*FamilyAccessTokenCreate) *FamilyAccessTokenCreateBulk {
+	return &FamilyAccessTokenCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *FamilyAccessTokenClient) MapCreateBulk(slice any, setFunc func(*FamilyAccessTokenCreate, int)) *FamilyAccessTokenCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &FamilyAccessTokenCreateBulk{err: fmt.Errorf("calling to FamilyAccessTokenClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*FamilyAccessTokenCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &FamilyAccessTokenCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for FamilyAccessToken.
+func (c *FamilyAccessTokenClient) Update() *FamilyAccessTokenUpdate {
+	mutation := newFamilyAccessTokenMutation(c.config, OpUpdate)
+	return &FamilyAccessTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FamilyAccessTokenClient) UpdateOne(_m *FamilyAccessToken) *FamilyAccessTokenUpdateOne {
+	mutation := newFamilyAccessTokenMutation(c.config, OpUpdateOne, withFamilyAccessToken(_m))
+	return &FamilyAccessTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FamilyAccessTokenClient) UpdateOneID(id int) *FamilyAccessTokenUpdateOne {
+	mutation := newFamilyAccessTokenMutation(c.config, OpUpdateOne, withFamilyAccessTokenID(id))
+	return &FamilyAccessTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for FamilyAccessToken.
+func (c *FamilyAccessTokenClient) Delete() *FamilyAccessTokenDelete {
+	mutation := newFamilyAccessTokenMutation(c.config, OpDelete)
+	return &FamilyAccessTokenDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FamilyAccessTokenClient) DeleteOne(_m *FamilyAccessToken) *FamilyAccessTokenDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FamilyAccessTokenClient) DeleteOneID(id int) *FamilyAccessTokenDeleteOne {
+	builder := c.Delete().Where(familyaccesstoken.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FamilyAccessTokenDeleteOne{builder}
+}
+
+// Query returns a query builder for FamilyAccessToken.
+func (c *FamilyAccessTokenClient) Query() *FamilyAccessTokenQuery {
+	return &FamilyAccessTokenQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeFamilyAccessToken},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a FamilyAccessToken entity by its id.
+func (c *FamilyAccessTokenClient) Get(ctx context.Context, id int) (*FamilyAccessToken, error) {
+	return c.Query().Where(familyaccesstoken.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FamilyAccessTokenClient) GetX(ctx context.Context, id int) *FamilyAccessToken {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryFamily queries the family edge of a FamilyAccessToken.
+func (c *FamilyAccessTokenClient) QueryFamily(_m *FamilyAccessToken) *FamilyQuery {
+	query := (&FamilyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(familyaccesstoken.Table, familyaccesstoken.FieldID, id),
+			sqlgraph.To(family.Table, family.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, familyaccesstoken.FamilyTable, familyaccesstoken.FamilyColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *FamilyAccessTokenClient) Hooks() []Hook {
+	return c.hooks.FamilyAccessToken
+}
+
+// Interceptors returns the client interceptors.
+func (c *FamilyAccessTokenClient) Interceptors() []Interceptor {
+	return c.inters.FamilyAccessToken
+}
+
+func (c *FamilyAccessTokenClient) mutate(ctx context.Context, m *FamilyAccessTokenMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FamilyAccessTokenCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FamilyAccessTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FamilyAccessTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FamilyAccessTokenDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown FamilyAccessToken mutation op: %q", m.Op())
 	}
 }
 
@@ -473,12 +860,328 @@ func (c *ProductClient) mutate(ctx context.Context, m *ProductMutation) (Value, 
 	}
 }
 
+// SessionClient is a client for the Session schema.
+type SessionClient struct {
+	config
+}
+
+// NewSessionClient returns a client for the Session from the given config.
+func NewSessionClient(c config) *SessionClient {
+	return &SessionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `session.Hooks(f(g(h())))`.
+func (c *SessionClient) Use(hooks ...Hook) {
+	c.hooks.Session = append(c.hooks.Session, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `session.Intercept(f(g(h())))`.
+func (c *SessionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Session = append(c.inters.Session, interceptors...)
+}
+
+// Create returns a builder for creating a Session entity.
+func (c *SessionClient) Create() *SessionCreate {
+	mutation := newSessionMutation(c.config, OpCreate)
+	return &SessionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Session entities.
+func (c *SessionClient) CreateBulk(builders ...*SessionCreate) *SessionCreateBulk {
+	return &SessionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SessionClient) MapCreateBulk(slice any, setFunc func(*SessionCreate, int)) *SessionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SessionCreateBulk{err: fmt.Errorf("calling to SessionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SessionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SessionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Session.
+func (c *SessionClient) Update() *SessionUpdate {
+	mutation := newSessionMutation(c.config, OpUpdate)
+	return &SessionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SessionClient) UpdateOne(_m *Session) *SessionUpdateOne {
+	mutation := newSessionMutation(c.config, OpUpdateOne, withSession(_m))
+	return &SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SessionClient) UpdateOneID(id int) *SessionUpdateOne {
+	mutation := newSessionMutation(c.config, OpUpdateOne, withSessionID(id))
+	return &SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Session.
+func (c *SessionClient) Delete() *SessionDelete {
+	mutation := newSessionMutation(c.config, OpDelete)
+	return &SessionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SessionClient) DeleteOne(_m *Session) *SessionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SessionClient) DeleteOneID(id int) *SessionDeleteOne {
+	builder := c.Delete().Where(session.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SessionDeleteOne{builder}
+}
+
+// Query returns a query builder for Session.
+func (c *SessionClient) Query() *SessionQuery {
+	return &SessionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSession},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Session entity by its id.
+func (c *SessionClient) Get(ctx context.Context, id int) (*Session, error) {
+	return c.Query().Where(session.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SessionClient) GetX(ctx context.Context, id int) *Session {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Session.
+func (c *SessionClient) QueryUser(_m *Session) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(session.Table, session.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, session.UserTable, session.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFamily queries the family edge of a Session.
+func (c *SessionClient) QueryFamily(_m *Session) *FamilyQuery {
+	query := (&FamilyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(session.Table, session.FieldID, id),
+			sqlgraph.To(family.Table, family.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, session.FamilyTable, session.FamilyColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SessionClient) Hooks() []Hook {
+	return c.hooks.Session
+}
+
+// Interceptors returns the client interceptors.
+func (c *SessionClient) Interceptors() []Interceptor {
+	return c.inters.Session
+}
+
+func (c *SessionClient) mutate(ctx context.Context, m *SessionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SessionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SessionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SessionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Session mutation op: %q", m.Op())
+	}
+}
+
+// UserClient is a client for the User schema.
+type UserClient struct {
+	config
+}
+
+// NewUserClient returns a client for the User from the given config.
+func NewUserClient(c config) *UserClient {
+	return &UserClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
+func (c *UserClient) Use(hooks ...Hook) {
+	c.hooks.User = append(c.hooks.User, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `user.Intercept(f(g(h())))`.
+func (c *UserClient) Intercept(interceptors ...Interceptor) {
+	c.inters.User = append(c.inters.User, interceptors...)
+}
+
+// Create returns a builder for creating a User entity.
+func (c *UserClient) Create() *UserCreate {
+	mutation := newUserMutation(c.config, OpCreate)
+	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of User entities.
+func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
+	return &UserCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *UserClient) MapCreateBulk(slice any, setFunc func(*UserCreate, int)) *UserCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &UserCreateBulk{err: fmt.Errorf("calling to UserClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*UserCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &UserCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for User.
+func (c *UserClient) Update() *UserUpdate {
+	mutation := newUserMutation(c.config, OpUpdate)
+	return &UserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserClient) UpdateOne(_m *User) *UserUpdateOne {
+	mutation := newUserMutation(c.config, OpUpdateOne, withUser(_m))
+	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
+	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
+	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for User.
+func (c *UserClient) Delete() *UserDelete {
+	mutation := newUserMutation(c.config, OpDelete)
+	return &UserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UserClient) DeleteOne(_m *User) *UserDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
+	builder := c.Delete().Where(user.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserDeleteOne{builder}
+}
+
+// Query returns a query builder for User.
+func (c *UserClient) Query() *UserQuery {
+	return &UserQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUser},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a User entity by its id.
+func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
+	return c.Query().Where(user.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserClient) GetX(ctx context.Context, id int) *User {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QuerySessions queries the sessions edge of a User.
+func (c *UserClient) QuerySessions(_m *User) *SessionQuery {
+	query := (&SessionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *UserClient) Hooks() []Hook {
+	return c.hooks.User
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserClient) Interceptors() []Interceptor {
+	return c.inters.User
+}
+
+func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown User mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		ConfirmationPresence, Product []ent.Hook
+		ConfirmationPresence, Family, FamilyAccessToken, Product, Session,
+		User []ent.Hook
 	}
 	inters struct {
-		ConfirmationPresence, Product []ent.Interceptor
+		ConfirmationPresence, Family, FamilyAccessToken, Product, Session,
+		User []ent.Interceptor
 	}
 )

@@ -6,6 +6,7 @@ import (
 	"wedding_api/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // ID filters vertices based on their ID field.
@@ -216,6 +217,29 @@ func IsConfirmedEQ(v bool) predicate.ConfirmationPresence {
 // IsConfirmedNEQ applies the NEQ predicate on the "is_confirmed" field.
 func IsConfirmedNEQ(v bool) predicate.ConfirmationPresence {
 	return predicate.ConfirmationPresence(sql.FieldNEQ(FieldIsConfirmed, v))
+}
+
+// HasFamily applies the HasEdge predicate on the "family" edge.
+func HasFamily() predicate.ConfirmationPresence {
+	return predicate.ConfirmationPresence(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, FamilyTable, FamilyColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFamilyWith applies the HasEdge predicate on the "family" edge with a given conditions (other predicates).
+func HasFamilyWith(preds ...predicate.Family) predicate.ConfirmationPresence {
+	return predicate.ConfirmationPresence(func(s *sql.Selector) {
+		step := newFamilyStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

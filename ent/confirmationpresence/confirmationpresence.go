@@ -4,6 +4,7 @@ package confirmationpresence
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -17,8 +18,17 @@ const (
 	FieldPhotoBase64 = "photo_base64"
 	// FieldIsConfirmed holds the string denoting the is_confirmed field in the database.
 	FieldIsConfirmed = "is_confirmed"
+	// EdgeFamily holds the string denoting the family edge name in mutations.
+	EdgeFamily = "family"
 	// Table holds the table name of the confirmationpresence in the database.
 	Table = "confirmation_presences"
+	// FamilyTable is the table that holds the family relation/edge.
+	FamilyTable = "confirmation_presences"
+	// FamilyInverseTable is the table name for the Family entity.
+	// It exists in this package in order to avoid circular dependency with the "family" package.
+	FamilyInverseTable = "families"
+	// FamilyColumn is the table column denoting the family relation/edge.
+	FamilyColumn = "family_presences"
 )
 
 // Columns holds all SQL columns for confirmationpresence fields.
@@ -29,10 +39,21 @@ var Columns = []string{
 	FieldIsConfirmed,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "confirmation_presences"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"family_presences",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -65,4 +86,18 @@ func ByPhotoBase64(opts ...sql.OrderTermOption) OrderOption {
 // ByIsConfirmed orders the results by the is_confirmed field.
 func ByIsConfirmed(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsConfirmed, opts...).ToFunc()
+}
+
+// ByFamilyField orders the results by family field.
+func ByFamilyField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFamilyStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newFamilyStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FamilyInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, FamilyTable, FamilyColumn),
+	)
 }

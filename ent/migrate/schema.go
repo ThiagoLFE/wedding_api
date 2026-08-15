@@ -14,12 +14,56 @@ var (
 		{Name: "fullname", Type: field.TypeString},
 		{Name: "photo_base64", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "is_confirmed", Type: field.TypeBool, Default: false},
+		{Name: "family_presences", Type: field.TypeInt, Nullable: true},
 	}
 	// ConfirmationPresencesTable holds the schema information for the "confirmation_presences" table.
 	ConfirmationPresencesTable = &schema.Table{
 		Name:       "confirmation_presences",
 		Columns:    ConfirmationPresencesColumns,
 		PrimaryKey: []*schema.Column{ConfirmationPresencesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "confirmation_presences_families_presences",
+				Columns:    []*schema.Column{ConfirmationPresencesColumns[4]},
+				RefColumns: []*schema.Column{FamiliesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// FamiliesColumns holds the columns for the "families" table.
+	FamiliesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+	}
+	// FamiliesTable holds the schema information for the "families" table.
+	FamiliesTable = &schema.Table{
+		Name:       "families",
+		Columns:    FamiliesColumns,
+		PrimaryKey: []*schema.Column{FamiliesColumns[0]},
+	}
+	// FamilyAccessTokensColumns holds the columns for the "family_access_tokens" table.
+	FamilyAccessTokensColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "token_hash", Type: field.TypeString, Unique: true},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "revoked_at", Type: field.TypeTime, Nullable: true},
+		{Name: "last_used_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "family_access_tokens", Type: field.TypeInt},
+	}
+	// FamilyAccessTokensTable holds the schema information for the "family_access_tokens" table.
+	FamilyAccessTokensTable = &schema.Table{
+		Name:       "family_access_tokens",
+		Columns:    FamilyAccessTokensColumns,
+		PrimaryKey: []*schema.Column{FamilyAccessTokensColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "family_access_tokens_families_access_tokens",
+				Columns:    []*schema.Column{FamilyAccessTokensColumns[6]},
+				RefColumns: []*schema.Column{FamiliesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// ProductsColumns holds the columns for the "products" table.
 	ProductsColumns = []*schema.Column{
@@ -35,12 +79,64 @@ var (
 		Columns:    ProductsColumns,
 		PrimaryKey: []*schema.Column{ProductsColumns[0]},
 	}
+	// SessionsColumns holds the columns for the "sessions" table.
+	SessionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "token_hash", Type: field.TypeString, Unique: true},
+		{Name: "role", Type: field.TypeEnum, Enums: []string{"admin", "family"}},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "revoked_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "family_sessions", Type: field.TypeInt, Nullable: true},
+		{Name: "user_sessions", Type: field.TypeInt, Nullable: true},
+	}
+	// SessionsTable holds the schema information for the "sessions" table.
+	SessionsTable = &schema.Table{
+		Name:       "sessions",
+		Columns:    SessionsColumns,
+		PrimaryKey: []*schema.Column{SessionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "sessions_families_sessions",
+				Columns:    []*schema.Column{SessionsColumns[6]},
+				RefColumns: []*schema.Column{FamiliesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "sessions_users_sessions",
+				Columns:    []*schema.Column{SessionsColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// UsersColumns holds the columns for the "users" table.
+	UsersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "email", Type: field.TypeString, Unique: true},
+		{Name: "password_hash", Type: field.TypeString},
+		{Name: "role", Type: field.TypeEnum, Enums: []string{"admin"}, Default: "admin"},
+	}
+	// UsersTable holds the schema information for the "users" table.
+	UsersTable = &schema.Table{
+		Name:       "users",
+		Columns:    UsersColumns,
+		PrimaryKey: []*schema.Column{UsersColumns[0]},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ConfirmationPresencesTable,
+		FamiliesTable,
+		FamilyAccessTokensTable,
 		ProductsTable,
+		SessionsTable,
+		UsersTable,
 	}
 )
 
 func init() {
+	ConfirmationPresencesTable.ForeignKeys[0].RefTable = FamiliesTable
+	FamilyAccessTokensTable.ForeignKeys[0].RefTable = FamiliesTable
+	SessionsTable.ForeignKeys[0].RefTable = FamiliesTable
+	SessionsTable.ForeignKeys[1].RefTable = UsersTable
 }

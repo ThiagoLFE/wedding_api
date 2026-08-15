@@ -9,7 +9,11 @@ import (
 	"reflect"
 	"sync"
 	"wedding_api/ent/confirmationpresence"
+	"wedding_api/ent/family"
+	"wedding_api/ent/familyaccesstoken"
 	"wedding_api/ent/product"
+	"wedding_api/ent/session"
+	"wedding_api/ent/user"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -75,7 +79,11 @@ func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			confirmationpresence.Table: confirmationpresence.ValidColumn,
+			family.Table:               family.ValidColumn,
+			familyaccesstoken.Table:    familyaccesstoken.ValidColumn,
 			product.Table:              product.ValidColumn,
+			session.Table:              session.ValidColumn,
+			user.Table:                 user.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

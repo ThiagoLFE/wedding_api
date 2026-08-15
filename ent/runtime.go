@@ -3,8 +3,11 @@
 package ent
 
 import (
+	"time"
 	"wedding_api/ent/confirmationpresence"
+	"wedding_api/ent/familyaccesstoken"
 	"wedding_api/ent/schema"
+	"wedding_api/ent/session"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -17,4 +20,18 @@ func init() {
 	confirmationpresenceDescIsConfirmed := confirmationpresenceFields[2].Descriptor()
 	// confirmationpresence.DefaultIsConfirmed holds the default value on creation for the is_confirmed field.
 	confirmationpresence.DefaultIsConfirmed = confirmationpresenceDescIsConfirmed.Default.(bool)
+	familyaccesstokenFields := schema.FamilyAccessToken{}.Fields()
+	_ = familyaccesstokenFields
+	// familyaccesstokenDescCreatedAt is the schema descriptor for created_at field.
+	familyaccesstokenDescCreatedAt := familyaccesstokenFields[4].Descriptor()
+	// familyaccesstoken.DefaultCreatedAt holds the default value on creation for the created_at field.
+	familyaccesstoken.DefaultCreatedAt = familyaccesstokenDescCreatedAt.Default.(func() time.Time)
+	sessionFields := schema.Session{}.Fields()
+	_ = sessionFields
+	// sessionDescCreatedAt is the schema descriptor for created_at field.
+	sessionDescCreatedAt := sessionFields[4].Descriptor()
+	// session.DefaultCreatedAt holds the default value on creation for the created_at field.
+	session.DefaultCreatedAt = sessionDescCreatedAt.Default.(func() time.Time)
+	userFields := schema.User{}.Fields()
+	_ = userFields
 }

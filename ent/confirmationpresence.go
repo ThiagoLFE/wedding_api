@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 	"wedding_api/ent/confirmationpresence"
+	"wedding_api/ent/family"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -21,8 +22,32 @@ type ConfirmationPresence struct {
 	// PhotoBase64 holds the value of the "photo_base64" field.
 	PhotoBase64 string `json:"photo_base64,omitempty"`
 	// IsConfirmed holds the value of the "is_confirmed" field.
-	IsConfirmed  bool `json:"is_confirmed,omitempty"`
-	selectValues sql.SelectValues
+	IsConfirmed bool `json:"is_confirmed,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the ConfirmationPresenceQuery when eager-loading is set.
+	Edges            ConfirmationPresenceEdges `json:"edges"`
+	family_presences *int
+	selectValues     sql.SelectValues
+}
+
+// ConfirmationPresenceEdges holds the relations/edges for other nodes in the graph.
+type ConfirmationPresenceEdges struct {
+	// Family holds the value of the family edge.
+	Family *Family `json:"family,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// FamilyOrErr returns the Family value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ConfirmationPresenceEdges) FamilyOrErr() (*Family, error) {
+	if e.Family != nil {
+		return e.Family, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: family.Label}
+	}
+	return nil, &NotLoadedError{edge: "family"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -36,6 +61,8 @@ func (*ConfirmationPresence) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case confirmationpresence.FieldFullname, confirmationpresence.FieldPhotoBase64:
 			values[i] = new(sql.NullString)
+		case confirmationpresence.ForeignKeys[0]: // family_presences
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -75,6 +102,13 @@ func (_m *ConfirmationPresence) assignValues(columns []string, values []any) err
 			} else if value.Valid {
 				_m.IsConfirmed = value.Bool
 			}
+		case confirmationpresence.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field family_presences", value)
+			} else if value.Valid {
+				_m.family_presences = new(int)
+				*_m.family_presences = int(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -86,6 +120,11 @@ func (_m *ConfirmationPresence) assignValues(columns []string, values []any) err
 // This includes values selected through modifiers, order, etc.
 func (_m *ConfirmationPresence) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryFamily queries the "family" edge of the ConfirmationPresence entity.
+func (_m *ConfirmationPresence) QueryFamily() *FamilyQuery {
+	return NewConfirmationPresenceClient(_m.config).QueryFamily(_m)
 }
 
 // Update returns a builder for updating this ConfirmationPresence.
